@@ -18,7 +18,7 @@ return new class extends Migration
             $table->dateTime('visit_date');
             $table->decimal('amount_due', 10, 2);
             $table->decimal('amount_paid', 10, 2)->default(0);
-            $table->enum('payment_status', ['paid', 'debt']);
+            $table->enum('payment_status', ['paid', 'unpaid', 'partial']);
             $table->boolean('is_exception')->default(false);
             $table->text('exception_reason')->nullable();
             $table->timestamps();

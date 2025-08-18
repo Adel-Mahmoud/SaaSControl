@@ -18,28 +18,35 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationGroup = 'Administration';
+    protected static ?string $navigationGroup = 'الادارة';
     protected static ?int $navigationSort = 1;
+    protected static ?string $slug = 'users';
+    protected static ?string $navigationLabel = 'المستخدمين';
+    protected static ?string $pluralModelLabel = 'المستخدمين';
+    protected static ?string $modelLabel = 'مستخدم';
+    
 
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Section::make('User Information')
-                ->description('Fill in the user details below')
+            Section::make('تفاصيل المستخدم')
+                ->description('قم بتعبئة التفاصيل الخاصة بالمستخدم')
                 ->schema([
                     Forms\Components\TextInput::make('name')
-                        ->label('Full Name')
+                        ->label('اسم المستخدم')
                         ->required()
                         ->maxLength(255),
 
                     Forms\Components\TextInput::make('email')
                         ->email()
+                        ->label('البريد الإلكتروني')
                         ->unique(ignoreRecord: true)
                         ->required()
                         ->maxLength(255),
 
                     Forms\Components\TextInput::make('password')
                         ->password()
+                        ->label('كلمة المرور')
                         ->dehydrateStateUsing(fn($state) => !empty($state) ? bcrypt($state) : null)
                         ->required(fn(string $context) => $context === 'create')
                         ->maxLength(255),
@@ -54,12 +61,15 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')
+                    ->label('اسم المستخدم')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('email')
+                    ->label('البريد الإلكتروني')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('تاريخ الإنشاء')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

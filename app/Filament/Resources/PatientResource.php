@@ -139,7 +139,9 @@ class PatientResource extends Resource
                             ])
                             ->defaultItems(1)
                             ->columns(2)
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->disableItemCreation()
+                            ->disableItemDeletion(),
                     ]),
             ]);
     }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Visit extends Model
 {
@@ -21,13 +22,13 @@ class Visit extends Model
     ];
 
     protected $casts = [
-        'visit_date'    => 'datetime',
-        'amount_due'    => 'decimal:2',
-        'amount_paid'   => 'decimal:2',
-        'is_exception'  => 'boolean',
+        'visit_date' => 'datetime',
+        'amount_due' => 'decimal:2',
+        'amount_paid' => 'decimal:2',
+        'is_exception' => 'boolean',
     ];
 
-    public function patient()
+    public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
     }
