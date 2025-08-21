@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Navigation\NavigationItem;
+use Filament\Navigation\NavigationGroup;
 use App\Filament\Resources\DoctorResource\Pages;
 
 class DoctorResource extends Resource
@@ -19,22 +20,43 @@ class DoctorResource extends Resource
     protected static ?string $pluralModelLabel = 'الأطباء';
     protected static ?string $modelLabel = 'طبيب';
     protected static ?string $slug = 'doctors';
-    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
     protected static bool $isCollapsed = true;
+
+    // public static function getNavigationItems(): array
+    // {
+    //     return [
+    //         NavigationItem::make()
+    //             ->label('الأطباء')
+    //             ->icon(null)
+    //             ->url(static::getUrl('index'))
+    //             ->group(static::getNavigationGroup())
+    //             ->sort(0),
+
+    //         NavigationItem::make()
+    //             ->label('إنشاء طبيب')
+    //             ->icon(null) 
+    //             ->url(static::getUrl('create'))
+    //             ->group(static::getNavigationGroup())
+    //             ->sort(1),
+    //     ];
+    // }
+    public static function getNavigationGroup(): ?string
+    {
+        return 'الأطباء';
+    }
 
     public static function getNavigationItems(): array
     {
         return [
             NavigationItem::make()
-                ->label('الأطباء')
-                ->icon('heroicon-o-user-group')
+                ->label('عرض الكل')
                 ->url(static::getUrl('index'))
                 ->group(static::getNavigationGroup())
                 ->sort(0),
 
             NavigationItem::make()
                 ->label('إنشاء طبيب')
-                ->icon('heroicon-o-plus')
                 ->url(static::getUrl('create'))
                 ->group(static::getNavigationGroup())
                 ->sort(1),
@@ -54,7 +76,11 @@ class DoctorResource extends Resource
                     ->label('الهاتف')
                     ->tel()
                     ->maxLength(20),
-            ]);
+                Forms\Components\TextInput::make('specialization')
+                    ->label('التخصص')
+                    ->required(),
+
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table
@@ -69,6 +95,7 @@ class DoctorResource extends Resource
                 Tables\Columns\TextColumn::make('phone')
                     ->label('الهاتف')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('specialization')    
             ])
             ->filters([])
             ->actions([

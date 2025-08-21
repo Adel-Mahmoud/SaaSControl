@@ -17,34 +17,31 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Navigation\Groups;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->brandName(\App\Models\Setting::first()?->project_name ?? 'Default Project')
-            ->brandLogo(asset('storage/' . \App\Models\Setting::first()?->logo_path ?? 'default-logo.png'))
             ->default()
+            ->navigationGroups(Groups::all())
             ->id('admin')
             ->path('admin')
             ->login()
+            ->registration()
+            ->passwordReset()
+            ->profile()
+            ->emailVerification()
             ->colors([
                 'primary' => Color::Blue,
             ])
-            // ->colors([
-            //     'primary' => "hsl(210,92%,55%)",
-            //     'info'    => "hsl(190,92%,55%)",
-            //     'success' => "hsl(145,70%,45%)",
-            //     'warning' => "hsl(35,92%,55%)",
-            //     'danger'  => "hsl(0,85%,55%)",
-            //     'dark'    => "hsl(220,15%,25%)",
-            //     'light'   => "hsl(0,0%,95%)",
-            // ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                // Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([

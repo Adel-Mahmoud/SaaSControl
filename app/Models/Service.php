@@ -12,4 +12,9 @@ class Service extends Model
         'price',
         'doctor_id',
     ];
+
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
+    }
 }
