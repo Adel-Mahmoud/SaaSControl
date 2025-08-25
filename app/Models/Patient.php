@@ -8,10 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Patient extends Model
 {
     protected $fillable = [
-        'name',
-        'phone',
+        'user_id',
         'address',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function visits(): HasMany
     {

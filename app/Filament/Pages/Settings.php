@@ -13,7 +13,6 @@ class Settings extends Page implements Forms\Contracts\HasForms
 {
     use Forms\Concerns\InteractsWithForms;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog';
     protected static string $view = 'filament.pages.settings';
     protected static ?string $navigationLabel = 'الإعدادات';
     protected static ?string $title = 'إعدادات النظام';

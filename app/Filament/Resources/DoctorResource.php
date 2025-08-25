@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use Filament\Forms;
+use App\Models\User;
 use Filament\Tables;
 use App\Models\Doctor;
 use Filament\Forms\Form;
@@ -20,31 +21,8 @@ class DoctorResource extends Resource
     protected static ?string $pluralModelLabel = 'الأطباء';
     protected static ?string $modelLabel = 'طبيب';
     protected static ?string $slug = 'doctors';
-    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
+    // protected static ?string $navigationIcon = 'heroicon-o-briefcase';
     protected static bool $isCollapsed = true;
-
-    // public static function getNavigationItems(): array
-    // {
-    //     return [
-    //         NavigationItem::make()
-    //             ->label('الأطباء')
-    //             ->icon(null)
-    //             ->url(static::getUrl('index'))
-    //             ->group(static::getNavigationGroup())
-    //             ->sort(0),
-
-    //         NavigationItem::make()
-    //             ->label('إنشاء طبيب')
-    //             ->icon(null) 
-    //             ->url(static::getUrl('create'))
-    //             ->group(static::getNavigationGroup())
-    //             ->sort(1),
-    //     ];
-    // }
-    public static function getNavigationGroup(): ?string
-    {
-        return 'الأطباء';
-    }
 
     public static function getNavigationItems(): array
     {
@@ -56,7 +34,7 @@ class DoctorResource extends Resource
                 ->sort(0),
 
             NavigationItem::make()
-                ->label('إنشاء طبيب')
+                ->label('إنشاء جديد')
                 ->url(static::getUrl('create'))
                 ->group(static::getNavigationGroup())
                 ->sort(1),
@@ -65,37 +43,55 @@ class DoctorResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('الاسم')
-                    ->required()
-                    ->maxLength(255),
+        return $form->schema([
+            Forms\Components\Section::make('بيانات الطبيب')
+                ->schema([
+                    Forms\Components\Select::make('user_id')
+                        ->label('المستخدم')
+                        ->relationship('user', 'name')
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->createOptionForm([ 
+                            Forms\Components\TextInput::make('name')
+                                ->label('الاسم')
+                                ->required(),
+                            Forms\Components\TextInput::make('email')
+                                ->label('البريد الإلكتروني')
+                                ->email()
+                                ->unique(User::class, 'email')
+                                ->required(),
+                            Forms\Components\TextInput::make('phone')
+                                ->label('رقم الهاتف')
+                                ->unique(User::class, 'phone')
+                                ->required(),
+                            Forms\Components\TextInput::make('password')
+                                ->label('كلمة المرور')
+                                ->password()
+                                ->required()
+                                ->dehydrateStateUsing(fn($state) => bcrypt($state)),
+                        ]),
 
-                Forms\Components\TextInput::make('phone')
-                    ->label('الهاتف')
-                    ->tel()
-                    ->maxLength(20),
-                Forms\Components\TextInput::make('specialization')
-                    ->label('التخصص')
-                    ->required(),
-
-            ])->columns(2);
+                    Forms\Components\TextInput::make('specialization')
+                        ->label('التخصص')
+                        ->required(),
+                ])
+        ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('user.name')
                     ->label('الاسم')
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('phone')
+                Tables\Columns\TextColumn::make('user.phone')
                     ->label('الهاتف')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('specialization')    
+                Tables\Columns\TextColumn::make('specialization')->label('التخصص')
             ])
             ->filters([])
             ->actions([

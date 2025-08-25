@@ -31,22 +31,30 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->registration()
+            ->sidebarCollapsibleOnDesktop()
+            ->sidebarFullyCollapsibleOnDesktop()
+            ->sidebarWidth('16rem') 
+            ->collapsedSidebarWidth('4rem')
+            // ->registration()
             ->passwordReset()
             ->profile()
             ->emailVerification()
             ->colors([
                 'primary' => Color::Blue,
+                'gray' => Color::Blue,
+                'background' => Color::hex('#0e4985ff'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                // Pages\Dashboard::class,
+                Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                // Widgets\AccountWidget::class,
+                // Widgets\FilamentInfoWidget::class,
+                \App\Filament\Widgets\TotalReservations::class,
+                \App\Filament\Widgets\ReservationsChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,

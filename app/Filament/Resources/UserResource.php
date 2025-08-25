@@ -17,14 +17,13 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-    protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationGroup = 'الادارة';
+    protected static ?string $navigationGroup = 'الإدارة';
     protected static ?int $navigationSort = 1;
     protected static ?string $slug = 'users';
     protected static ?string $navigationLabel = 'المستخدمين';
     protected static ?string $pluralModelLabel = 'المستخدمين';
     protected static ?string $modelLabel = 'مستخدم';
-    
+
 
     public static function form(Form $form): Form
     {
@@ -43,7 +42,11 @@ class UserResource extends Resource
                         ->unique(ignoreRecord: true)
                         ->required()
                         ->maxLength(255),
-
+                    Forms\Components\TextInput::make('phone')
+                        ->label('رقم الهاتف')
+                        ->unique(ignoreRecord: true)
+                        ->required()
+                        ->maxLength(20),
                     Forms\Components\TextInput::make('password')
                         ->password()
                         ->label('كلمة المرور')
@@ -51,7 +54,7 @@ class UserResource extends Resource
                         ->required(fn(string $context) => $context === 'create')
                         ->maxLength(255),
                 ])
-                ->columns(2) 
+                ->columns(2)
         ]);
     }
 
@@ -66,6 +69,10 @@ class UserResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('email')
                     ->label('البريد الإلكتروني')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('رقم الهاتف')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
