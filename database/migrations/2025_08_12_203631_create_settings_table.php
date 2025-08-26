@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->string('project_name');
-            $table->string('logo_path')->nullable();
-            $table->decimal('consult_price', 10, 2)->default(0); 
-            $table->decimal('followup_price', 10, 2)->default(0); 
-            $table->integer('followup_days')->default(0);
+            $table->string('key')->unique(); 
+            $table->text('value')->nullable(); 
+            $table->string('type')->default('text'); 
+            $table->string('group')->default('general');
             $table->timestamps();
+
+            $table->index('key');
+            $table->index('group');
         });
     }
 
