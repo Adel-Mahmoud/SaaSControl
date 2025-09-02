@@ -20,20 +20,27 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Filament\Navigation\Groups;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
+use App\Services\SettingsService;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+
+        $logo = SettingsService::get('project_logo');
+        $name = SettingsService::get('project_name');
+
         return $panel
             ->default()
+            ->brandName($name ?? 'My Project')
+            ->brandLogo($logo ? asset('storage/' . $logo) : null)
             ->navigationGroups(Groups::all())
             ->id('admin')
             ->path('admin')
             ->login()
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop()
-            ->sidebarWidth('16rem') 
+            ->sidebarWidth('16rem')
             ->collapsedSidebarWidth('4rem')
             // ->registration()
             ->passwordReset()

@@ -13,8 +13,8 @@ class Groups
             NavigationGroup::make()->label('الأطباء')->icon('heroicon-o-user-group'),
             NavigationGroup::make()->label('الخدمات')->icon('heroicon-o-briefcase'),
             NavigationGroup::make()->label('المرضى')->icon('heroicon-o-users'),
-            NavigationGroup::make()->label('الإدارة')->icon('heroicon-o-cog'),
             NavigationGroup::make()->label('تقارير')->icon('heroicon-o-chart-bar'), 
+            NavigationGroup::make()->label('المستخدمين')->icon('heroicon-o-users'), 
         ];
     }
 }

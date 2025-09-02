@@ -11,19 +11,34 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Section;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Navigation\NavigationItem;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-    protected static ?string $navigationGroup = 'الإدارة';
+    protected static ?string $navigationGroup = 'المستخدمين';
     protected static ?int $navigationSort = 1;
     protected static ?string $slug = 'users';
     protected static ?string $navigationLabel = 'المستخدمين';
     protected static ?string $pluralModelLabel = 'المستخدمين';
     protected static ?string $modelLabel = 'مستخدم';
 
+    public static function getNavigationItems(): array
+    {
+        return [
+            NavigationItem::make()
+                ->label('عرض الكل')
+                ->url(static::getUrl('index'))
+                ->group(static::getNavigationGroup())
+                ->sort(0),
+
+            NavigationItem::make()
+                ->label('إنشاء جديد')
+                ->url(static::getUrl('create'))
+                ->group(static::getNavigationGroup())
+                ->sort(1),
+        ];
+    }
 
     public static function form(Form $form): Form
     {

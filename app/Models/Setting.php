@@ -6,6 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
-    protected $fillable = ['key', 'value', 'type', 'group'];
+    protected $fillable = ['project_name', 'project_logo', 'project_brand'];
     
 }

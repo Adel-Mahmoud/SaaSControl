@@ -2,234 +2,327 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use App\Models\Reservation;
+use App\Models\Patient;
 use App\Models\Doctor;
 use App\Models\Service;
-use Illuminate\Support\Facades\DB;
+use Filament\Pages\Page;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Carbon\Carbon;
-use Livewire\Attributes\On;
+use Illuminate\Support\Facades\DB;
 
 class Reports extends Page implements HasForms
 {
     use InteractsWithForms;
 
     protected static string $view = 'filament.pages.reports';
-    protected static ?string $navigationLabel = 'التقارير';
     protected static ?string $title = 'التقارير';
-    protected static ?string $navigationGroup = 'تقارير';
-    protected static ?string $slug = 'reports';
+    protected static ?string $navigationGroup = 'التقارير والإحصاءات';
+    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
-    public $reportType = 'daily';
-    public $startDate;
-    public $endDate;
-    public $doctorId = null;
-    public $serviceId = null;
-    public $reportData = [];
-    public $totalAmount = 0;
-    public $totalReservations = 0;
+    public ?array $data = [];
+    public $reportType = 'reservations';
+    public $chartData = [];
+    public $summaryData = [];
+    public $tableData = [];
 
     public function mount()
     {
-        $this->startDate = now()->startOfMonth()->toDateString();
-        $this->endDate = now()->endOfMonth()->toDateString();
+        $this->form->fill([
+            'start_date' => now()->startOfMonth()->toDateString(),
+            'end_date' => now()->toDateString(),
+            'doctor_id' => null,
+            'status' => null,
+        ]);
         $this->generateReport();
     }
 
     public function form(Form $form): Form
     {
         return $form
+            ->statePath('data')
             ->schema([
                 Section::make('معايير التقرير')
                     ->schema([
-                        Select::make('reportType')
-                            ->label('نوع التقرير')
-                            ->options([
-                                'daily' => 'يومي',
-                                'monthly' => 'شهري', 
-                                'yearly' => 'سنوي',
-                                'custom' => 'مخصص',
-                                'all' => 'جميع الحجوزات' // أضفنا خيار جميع الحجوزات
-                            ])
-                            ->reactive()
-                            ->required()
-                            ->default('daily'),
+                        Grid::make(3)->schema([
+                            Select::make('report_type')
+                                ->label('نوع التقرير')
+                                ->options([
+                                    'reservations' => 'تقرير الحجوزات',
+                                    'revenue' => 'تقرير الإيرادات',
+                                    'patients' => 'تقرير المرضى',
+                                    'doctors' => 'تقرير الأطباء',
+                                ])
+                                ->reactive()
+                                ->required(),
 
-                        DatePicker::make('startDate')
-                            ->label('من تاريخ')
-                            ->required()
-                            ->visible(fn($get) => $get('reportType') === 'custom'),
+                            DatePicker::make('start_date')
+                                ->label('من تاريخ')
+                                ->required()
+                                ->displayFormat('d/m/Y')
+                                ->native(false),
 
-                        DatePicker::make('endDate')
-                            ->label('إلى تاريخ')
-                            ->required()
-                            ->visible(fn($get) => $get('reportType') === 'custom'),
+                            DatePicker::make('end_date')
+                                ->label('إلى تاريخ')
+                                ->required()
+                                ->displayFormat('d/m/Y')
+                                ->native(false),
+                        ]),
 
-                        Select::make('doctorId')
-                            ->label('تصفية حسب الطبيب')
-                            ->options(Doctor::pluck('name', 'id'))
-                            ->searchable()
-                            ->nullable()
-                            ->placeholder('جميع الأطباء'),
+                        Grid::make(2)->schema([
+                            Select::make('doctor_id')
+                                ->label('الطبيب')
+                                ->options(Doctor::with('user')->get()->pluck('user.name', 'id'))
+                                ->searchable()
+                                ->nullable(),
 
-                        Select::make('serviceId')
-                            ->label('تصفية حسب الخدمة')
-                            ->options(Service::pluck('name', 'id'))
-                            ->searchable()
-                            ->nullable()
-                            ->placeholder('جميع الخدمات'),
-                    ])
-                    ->columns(2),
+                            Select::make('status')
+                                ->label('حالة الحجز')
+                                ->options([
+                                    'pending' => 'قيد الانتظار',
+                                    'confirmed' => 'مؤكد',
+                                    'completed' => 'مكتمل',
+                                    'cancelled' => 'ملغي',
+                                ])
+                                ->nullable()
+                                ->visible(fn ($get) => $get('report_type') === 'reservations'),
+                        ]),
+                    ]),
             ]);
     }
 
     public function generateReport()
     {
-        // بداية بناء الاستعلام
-        $query = Reservation::with(['patient', 'doctor', 'service']);
-            
-        // تطبيق الفلتر حسب نوع التقرير
-        switch ($this->reportType) {
-            case 'daily':
-                $query->whereDate('reservation_date', now()->toDateString());
+        $data = $this->form->getState();
+        $startDate = Carbon::parse($data['start_date']);
+        $endDate = Carbon::parse($data['end_date']);
+
+        switch ($data['report_type']) {
+            case 'reservations':
+                $this->generateReservationsReport($startDate, $endDate, $data);
                 break;
-                
-            case 'monthly':
-                $query->whereBetween('reservation_date', [
-                    now()->startOfMonth(),
-                    now()->endOfMonth()
-                ]);
+            case 'revenue':
+                $this->generateRevenueReport($startDate, $endDate, $data);
                 break;
-                
-            case 'yearly':
-                $query->whereYear('reservation_date', now()->year);
+            case 'patients':
+                $this->generatePatientsReport($startDate, $endDate);
                 break;
-                
-            case 'custom':
-                if ($this->startDate && $this->endDate) {
-                    $query->whereBetween('reservation_date', [
-                        $this->startDate . ' 00:00:00',
-                        $this->endDate . ' 23:59:59'
-                    ]);
-                }
+            case 'doctors':
+                $this->generateDoctorsReport($startDate, $endDate);
                 break;
-                
-            case 'all':
-                // لا نضيف أي شرط تاريخ - جميع الحجوزات
-                break;
-        }
-
-        // تطبيق الفلتر حسب الطبيب
-        if ($this->doctorId) {
-            $query->where('doctor_id', $this->doctorId);
-        }
-
-        // تطبيق الفلتر حسب الخدمة
-        if ($this->serviceId) {
-            $query->where('service_id', $this->serviceId);
-        }
-
-        // جلب البيانات
-        $this->reportData = $query->orderBy('reservation_date', 'desc')->get();
-        
-        // حساب الإحصائيات
-        $this->totalReservations = $this->reportData->count();
-        $this->totalAmount = $this->reportData->sum('service_price');
-        
-        // Debug: عرض عدد الحجوزات المسترجعة
-        \Log::info('عدد الحجوزات المسترجعة: ' . $this->totalReservations);
-        \Log::info('معايير البحث:', [
-            'reportType' => $this->reportType,
-            'doctorId' => $this->doctorId,
-            'serviceId' => $this->serviceId,
-            'startDate' => $this->startDate,
-            'endDate' => $this->endDate
-        ]);
-    }
-
-    // دالة مساعدة لعرض البيانات المجمعة
-    public function getGroupedData()
-    {
-        if ($this->reportData->isEmpty()) {
-            return collect();
-        }
-
-        $grouped = [];
-
-        switch ($this->reportType) {
-            case 'daily':
-                $grouped = $this->reportData->groupBy(function ($item) {
-                    return Carbon::parse($item->reservation_date)->format('H:i');
-                });
-                break;
-                
-            case 'monthly':
-                $grouped = $this->reportData->groupBy(function ($item) {
-                    return Carbon::parse($item->reservation_date)->format('Y-m-d');
-                });
-                break;
-                
-            case 'yearly':
-                $grouped = $this->reportData->groupBy(function ($item) {
-                    return Carbon::parse($item->reservation_date)->format('Y-m');
-                });
-                break;
-                
-            default:
-                $grouped = $this->reportData->groupBy(function ($item) {
-                    return Carbon::parse($item->reservation_date)->format('Y-m-d');
-                });
-        }
-
-        return $grouped;
-    }
-
-    // إحصائيات الأطباء
-    public function getDoctorStats()
-    {
-        if ($this->reportData->isEmpty()) {
-            return collect();
-        }
-
-        return $this->reportData->groupBy('doctor.name')->map(function ($group) {
-            return [
-                'count' => $group->count(),
-                'amount' => $group->sum('service_price')
-            ];
-        });
-    }
-
-    // إحصائيات الخدمات
-    public function getServiceStats()
-    {
-        if ($this->reportData->isEmpty()) {
-            return collect();
-        }
-
-        return $this->reportData->groupBy('service.name')->map(function ($group) {
-            return [
-                'count' => $group->count(),
-                'amount' => $group->sum('service_price')
-            ];
-        });
-    }
-
-    // تحديث التقرير عند تغيير المعايير
-    public function updated($property)
-    {
-        if (in_array($property, ['reportType', 'startDate', 'endDate', 'doctorId', 'serviceId'])) {
-            $this->generateReport();
         }
     }
 
-    public static function getNavigationSort(): ?int
+    private function generateReservationsReport($startDate, $endDate, $filters)
     {
-        return 6;
+        $query = Reservation::with(['patient.user', 'doctor.user', 'service'])
+            ->whereBetween('reservation_date', [$startDate, $endDate]);
+
+        if ($filters['doctor_id']) {
+            $query->where('doctor_id', $filters['doctor_id']);
+        }
+
+        if ($filters['status']) {
+            $query->where('status', $filters['status']);
+        }
+
+        // Chart data - reservations by day
+        $chartQuery = clone $query;
+        $this->chartData = $chartQuery->select(
+            DB::raw('DATE(reservation_date) as date'),
+            DB::raw('COUNT(*) as count')
+        )
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->toArray();
+
+        // Summary data
+        $this->summaryData = [
+            'total_reservations' => $query->count(),
+            'pending' => $query->clone()->where('status', 'pending')->count(),
+            'confirmed' => $query->clone()->where('status', 'confirmed')->count(),
+            'completed' => $query->clone()->where('status', 'completed')->count(),
+            'cancelled' => $query->clone()->where('status', 'cancelled')->count(),
+        ];
+
+        // Table data
+        $this->tableData = $query->orderBy('reservation_date', 'desc')
+            ->get()
+            ->map(function ($reservation) {
+                return [
+                    'id' => $reservation->id,
+                    'patient' => $reservation->patient->user->name,
+                    'doctor' => $reservation->doctor->user->name,
+                    'service' => $reservation->service->name,
+                    'date' => $reservation->reservation_date->format('d/m/Y'),
+                    'status' => $reservation->status,
+                    'price' => $reservation->service_price,
+                ];
+            });
+    }
+
+    private function generateRevenueReport($startDate, $endDate, $filters)
+    {
+        $query = Reservation::with(['doctor.user', 'service'])
+            ->whereBetween('reservation_date', [$startDate, $endDate])
+            ->where('status', 'completed');
+
+        if ($filters['doctor_id']) {
+            $query->where('doctor_id', $filters['doctor_id']);
+        }
+
+        // Chart data - revenue by day
+        $chartQuery = clone $query;
+        $this->chartData = $chartQuery->select(
+            DB::raw('DATE(reservation_date) as date'),
+            DB::raw('SUM(service_price) as revenue')
+        )
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->toArray();
+
+        // Summary data
+        $this->summaryData = [
+            'total_revenue' => $query->sum('service_price'),
+            'total_reservations' => $query->count(),
+            'average_revenue' => $query->avg('service_price'),
+        ];
+
+        // Table data - revenue by doctor
+        $this->tableData = $query->select(
+            'doctor_id',
+            DB::raw('SUM(service_price) as total_revenue'),
+            DB::raw('COUNT(*) as reservations_count')
+        )
+            ->groupBy('doctor_id')
+            ->with('doctor.user')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'doctor' => $item->doctor->user->name,
+                    'reservations' => $item->reservations_count,
+                    'revenue' => $item->total_revenue,
+                ];
+            });
+    }
+
+    private function generatePatientsReport($startDate, $endDate)
+    {
+        $query = Patient::with(['user', 'reservations'])
+            ->whereHas('reservations', function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('reservation_date', [$startDate, $endDate]);
+            });
+
+        // Chart data - patients by registration date
+        $this->chartData = Patient::select(
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('COUNT(*) as count')
+        )
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->toArray();
+
+        // Summary data
+        $this->summaryData = [
+            'total_patients' => $query->count(),
+            'new_patients' => Patient::whereBetween('created_at', [$startDate, $endDate])->count(),
+            'active_patients' => $query->distinct()->count(),
+        ];
+
+        // Table data - patients with reservation count
+        $this->tableData = $query->withCount(['reservations' => function ($q) use ($startDate, $endDate) {
+            $q->whereBetween('reservation_date', [$startDate, $endDate]);
+        }])
+            ->get()
+            ->map(function ($patient) {
+                return [
+                    'id' => $patient->id,
+                    'name' => $patient->user->name,
+                    'phone' => $patient->user->phone,
+                    'reservations_count' => $patient->reservations_count,
+                    'last_visit' => $patient->reservations->max('reservation_date')?->format('d/m/Y'),
+                ];
+            });
+    }
+
+    private function generateDoctorsReport($startDate, $endDate)
+    {
+        $query = Doctor::with(['user', 'reservations' => function ($q) use ($startDate, $endDate) {
+            $q->whereBetween('reservation_date', [$startDate, $endDate]);
+        }]);
+
+        // Chart data - doctors by performance
+        $this->chartData = $query->withCount(['reservations' => function ($q) use ($startDate, $endDate) {
+            $q->whereBetween('reservation_date', [$startDate, $endDate])
+                ->where('status', 'completed');
+        }])
+            ->get()
+            ->map(function ($doctor) {
+                return [
+                    'doctor' => $doctor->user->name,
+                    'reservations' => $doctor->reservations_count,
+                ];
+            })
+            ->toArray();
+
+        // Summary data
+        $this->summaryData = [
+            'total_doctors' => $query->count(),
+            'active_doctors' => $query->whereHas('reservations')->count(),
+            'total_appointments' => $query->withCount('reservations')->get()->sum('reservations_count'),
+        ];
+
+        // Table data - doctors with performance metrics
+        $this->tableData = $query->withCount([
+            'reservations',
+            'reservations as completed_reservations' => function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('reservation_date', [$startDate, $endDate])
+                    ->where('status', 'completed');
+            },
+            'reservations as revenue' => function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('reservation_date', [$startDate, $endDate])
+                    ->where('status', 'completed')
+                    ->select(DB::raw('SUM(service_price)'));
+            }
+        ])
+            ->get()
+            ->map(function ($doctor) {
+                return [
+                    'id' => $doctor->id,
+                    'name' => $doctor->user->name,
+                    'total_reservations' => $doctor->reservations_count,
+                    'completed_reservations' => $doctor->completed_reservations,
+                    'revenue' => $doctor->revenue,
+                    'specialization' => $doctor->specialization,
+                ];
+            });
+    }
+
+    public function exportReport()
+    {
+        $data = $this->form->getState();
+        $fileName = 'report_' . $data['report_type'] . '_' . now()->format('Y-m-d') . '.xlsx';
+
+        // Here you would implement the export logic using Laravel Excel
+        // For now, we'll just show a notification
+        Notification::make()
+            ->title('جاري تصدير التقرير')
+            ->body('سيتم تحميل الملف خلال ثوانٍ')
+            ->success()
+            ->send();
+
+        // Return download response (pseudo-code)
+        // return Excel::download(new ReportExport($this->tableData), $fileName);
     }
 }

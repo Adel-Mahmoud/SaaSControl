@@ -13,14 +13,10 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->string('key')->unique(); 
-            $table->text('value')->nullable(); 
-            $table->string('type')->default('text'); 
-            $table->string('group')->default('general');
+            $table->string('project_name')->nullable();
+            $table->string('project_logo')->nullable();
+            $table->string('project_brand')->nullable();
             $table->timestamps();
-
-            $table->index('key');
-            $table->index('group');
         });
     }
 
