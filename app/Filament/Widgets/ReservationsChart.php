@@ -12,10 +12,8 @@ class ReservationsChart extends ChartWidget
     protected static ?string $heading = 'إحصائيات الحجوزات';
     protected static ?int $sort = 2;
     
-    // جعل الـ widget يشغل العرض الكامل
     protected int | string | array $columnSpan = 'full';
     
-    // جعل ارتفاع الرسم البياني أكبر
     protected static ?string $maxHeight = '400px';
 
     public ?string $filter = 'month';
@@ -58,7 +56,7 @@ class ReservationsChart extends ChartWidget
     {
         $query = Reservation::query();
         $format = 'd M';
-        $groupBy = 'DATE(reservation_date)'; // غيرت من created_at إلى reservation_date
+        $groupBy = 'DATE(reservation_date)'; 
 
         switch ($this->filter) {
             case 'today':
@@ -165,7 +163,6 @@ class ReservationsChart extends ChartWidget
         ];
     }
 
-    // إضافة وصف للتغييرات
     public function getDescription(): ?string
     {
         $current = $this->getCurrentPeriodCount();

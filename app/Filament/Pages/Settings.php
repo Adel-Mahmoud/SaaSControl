@@ -4,7 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\Setting;
 use Filament\Forms;
-use Filament\Pages\Page;
+use Filament\Pages\Page; 
 use Filament\Forms\Form;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -15,9 +15,11 @@ class Settings extends Page implements Forms\Contracts\HasForms
     use Forms\Concerns\InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-cog';
-    protected static ?string $navigationGroup = 'الإعدادات';
     protected static ?string $title = 'إعدادات المشروع';
+    protected static ?string $slug = 'settings';
+    protected static ?string $navigationLabel = 'الإعدادات';
     protected static string $view = 'filament.pages.settings';
+    protected static ?int $navigationSort = 9999;
 
     public ?array $data = [];
     public ?string $oldLogo = null;
