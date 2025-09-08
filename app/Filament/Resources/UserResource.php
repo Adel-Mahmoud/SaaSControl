@@ -17,11 +17,11 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
     protected static ?string $navigationGroup = 'المستخدمين';
-    protected static ?int $navigationSort = 1;
     protected static ?string $slug = 'users';
     protected static ?string $navigationLabel = 'المستخدمين';
     protected static ?string $pluralModelLabel = 'المستخدمين';
     protected static ?string $modelLabel = 'مستخدم';
+    protected static ?int $navigationSort = 6;
 
     public static function getNavigationItems(): array
     {

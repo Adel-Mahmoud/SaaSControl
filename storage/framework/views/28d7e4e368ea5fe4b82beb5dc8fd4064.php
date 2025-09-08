@@ -420,4 +420,4 @@ html {
         });
     </script>
 </body>
-</html>
+</html><?php /**PATH C:\laragon\www\clinic\resources\views/welcome.blade.php ENDPATH**/ ?>

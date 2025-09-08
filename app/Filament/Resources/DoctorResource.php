@@ -21,7 +21,7 @@ class DoctorResource extends Resource
     protected static ?string $pluralModelLabel = 'الأطباء';
     protected static ?string $modelLabel = 'طبيب';
     protected static ?string $slug = 'doctors';
-    // protected static ?string $navigationIcon = 'heroicon-o-briefcase';
+    protected static ?int $navigationSort = 3;
     protected static bool $isCollapsed = true;
 
     public static function getNavigationItems(): array

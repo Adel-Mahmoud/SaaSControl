@@ -20,8 +20,7 @@ class ServiceResource extends Resource
     protected static ?string $pluralModelLabel = 'الخدمات';
     protected static ?string $slug = 'services';
     protected static ?string $title = 'إدارة الخدمات';
-    protected static ?int $navigationSort = 3;
-    // protected static ?string $navigationIcon = 'heroicon-o-cog';
+    protected static ?int $navigationSort = 4;
 
     public static function getNavigationItems(): array
     {

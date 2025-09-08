@@ -4,7 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\Setting;
 use Filament\Forms;
-use Filament\Pages\Page; 
+use Filament\Pages\Page;
 use Filament\Forms\Form;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -19,11 +19,16 @@ class Settings extends Page implements Forms\Contracts\HasForms
     protected static ?string $slug = 'settings';
     protected static ?string $navigationLabel = 'الإعدادات';
     protected static string $view = 'filament.pages.settings';
-    protected static ?int $navigationSort = 9999;
+    // protected static ?int $navigationSort = 7;
 
     public ?array $data = [];
     public ?string $oldLogo = null;
     public ?string $oldBrand = null;
+
+    public static function getNavigationSort(): int
+    {
+        return 7;
+    }
 
     public function mount(): void
     {
@@ -100,7 +105,6 @@ class Settings extends Page implements Forms\Contracts\HasForms
                 ->title('تم حفظ الإعدادات بنجاح')
                 ->success()
                 ->send();
-
         } catch (\Exception $e) {
             Notification::make()
                 ->title('حدث خطأ أثناء الحفظ')

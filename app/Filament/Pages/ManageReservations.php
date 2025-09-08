@@ -27,6 +27,7 @@ class ManageReservations extends Page implements HasForms
     protected static string $view = 'filament.pages.manage-reservations';
     protected static ?string $title = 'إدارة الحجوزات';
     protected static ?string $navigationGroup = 'الحجوزات';
+    protected static ?int $navigationSort = 2;
 
     public ?array $data = [];
     public ?Patient $selectedPatient = null;

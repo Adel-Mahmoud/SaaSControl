@@ -20,6 +20,7 @@ class PatientResource extends Resource
     protected static ?string $navigationLabel = 'المرضى';
     protected static ?string $pluralModelLabel = 'المرضى';
     protected static ?string $modelLabel = 'مريض';
+    protected static ?int $navigationSort = 5;
 
     public static function getNavigationItems(): array
     {
