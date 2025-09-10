@@ -82,6 +82,7 @@ class ManageReservations extends Page implements HasForms
 
     public function showPatient($id)
     {
+        // $this->selectedPatient = Reservation::with('user')->find($id);
         $this->selectedPatient = Patient::with('user')->find($id);
         $this->showPatientModal = true;
     }

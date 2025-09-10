@@ -13,7 +13,6 @@ class TotalReservations extends BaseWidget
     
     protected function getStats(): array
     {
-        // إحصائيات حجوزات اليوم فقط
         $today = Carbon::today();
         
         $todayReservations = Reservation::whereDate('reservation_date', $today)->count();
@@ -27,7 +26,7 @@ class TotalReservations extends BaseWidget
             ->sum('service_price');
         
         $todayConfirmedReservations = Reservation::whereDate('reservation_date', $today)
-            ->where('status', 'confirmed')
+            ->where('status', 'completad')
             ->count();
 
         return [

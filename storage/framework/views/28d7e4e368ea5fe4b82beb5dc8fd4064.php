@@ -14,9 +14,9 @@
     
     <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    @if ($logo = filament()->getBrandLogo() ?? filament()->getFavicon())
-        <link rel="icon" href="{{ $logo }}" />
-    @endif
+    <?php if($logo = filament()->getBrandLogo() ?? filament()->getFavicon()): ?>
+        <link rel="icon" href="<?php echo e($logo); ?>" />
+    <?php endif; ?>
     <style>
         /* Medical Clinic Welcome Page Styles */
 
@@ -478,4 +478,4 @@
         });
     </script>
 </body>
-</html>
+</html><?php /**PATH C:\laragon\www\clinic\resources\views/welcome.blade.php ENDPATH**/ ?>

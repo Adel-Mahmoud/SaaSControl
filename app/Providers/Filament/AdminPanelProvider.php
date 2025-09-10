@@ -43,7 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarWidth('16rem')
             ->collapsedSidebarWidth('4rem')
             // ->registration()
-            ->passwordReset()
+            // ->passwordReset()
             ->profile()
             ->emailVerification()
             ->colors([
@@ -51,6 +51,7 @@ class AdminPanelProvider extends PanelProvider
                 'gray' => Color::Blue,
                 'background' => Color::hex('#0e4985ff'),
             ])
+            ->spa()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

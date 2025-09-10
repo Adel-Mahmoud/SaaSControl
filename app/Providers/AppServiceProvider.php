@@ -22,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         // URL::forceRootUrl(request()->getSchemeAndHttpHost());
+        if ($this->app->environment('local')) {
+            URL::forceRootUrl(config('app.url'));
+            URL::forceScheme('https');
+            config(['session.domain' => '.codjix.me']);
+        }
     }
 
 }

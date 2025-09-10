@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
-            $table->string('user_id');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->text('address')->nullable();
             $table->timestamps();
         });
