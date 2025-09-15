@@ -72,7 +72,6 @@ class UserResource extends Resource
                         ->label('Role')
                         ->multiple(false)
                         ->relationship('roles', 'name')
-
                         ->required(),
                 ])
                 ->columns(2)

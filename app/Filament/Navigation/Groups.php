@@ -11,7 +11,7 @@ class Groups
         return [
             
             NavigationGroup::make()->label('المستخدمين')->icon('heroicon-o-user-group'), 
-            NavigationGroup::make()->label('الادوار والصلاحيات')->icon('heroicon-o-lock-closed'),
+            NavigationGroup::make()->label('الادوار والصلاحيات')->icon('heroicon-o-shield-check'),
             NavigationGroup::make()->label('الإعدادات')->icon('heroicon-o-cog'), 
         ];
     }
