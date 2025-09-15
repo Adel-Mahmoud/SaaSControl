@@ -18,17 +18,12 @@ class Settings extends Page implements Forms\Contracts\HasForms
     protected static ?string $title = 'إعدادات المشروع';
     protected static ?string $slug = 'settings';
     protected static ?string $navigationLabel = 'الإعدادات';
+    protected static ?string $navigationGroup = 'الإعدادات';
     protected static string $view = 'filament.pages.settings';
-    // protected static ?int $navigationSort = 7;
 
     public ?array $data = [];
     public ?string $oldLogo = null;
     public ?string $oldBrand = null;
-
-    public static function getNavigationSort(): int
-    {
-        return 7;
-    }
 
     public function mount(): void
     {

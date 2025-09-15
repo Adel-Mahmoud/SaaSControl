@@ -49,8 +49,8 @@ class UserResource extends Resource
                     Forms\Components\TextInput::make('name')
                         ->label('اسم المستخدم')
                         ->required()
-                        ->maxLength(255),
-
+                        ->maxLength(255)
+                        ->columnSpan('full'),
                     Forms\Components\TextInput::make('email')
                         ->email()
                         ->label('البريد الإلكتروني')
@@ -68,6 +68,12 @@ class UserResource extends Resource
                         ->dehydrateStateUsing(fn($state) => !empty($state) ? bcrypt($state) : null)
                         ->required(fn(string $context) => $context === 'create')
                         ->maxLength(255),
+                    Forms\Components\Select::make('roles')
+                        ->label('Role')
+                        ->multiple(false)
+                        ->relationship('roles', 'name')
+
+                        ->required(),
                 ])
                 ->columns(2)
         ]);
@@ -77,7 +83,10 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->sortable(),
+                Tables\Columns\TextColumn::make('index')
+                ->label('#')
+                ->rowIndex(),
+                // Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('اسم المستخدم')
                     ->searchable()
@@ -95,13 +104,18 @@ class UserResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('roles.name')->label('Role'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn($record) => $record->id !== auth()->id()),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make()
+                    ->before(function ($records) {
+                        return $records->reject(fn($r) => $r->id === auth()->id());
+                    }),
             ])
             ->defaultSort('id', 'desc');
     }
