@@ -20,12 +20,17 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Filament\Navigation\Groups;
 use App\Services\SettingsService;
+use Filament\View\PanelsRenderHook;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => '<link rel="stylesheet" href="'.asset('css/custom.css').'">'
+            )
             ->default()
             ->brandName(SettingsService::get('project_name') ?? 'My Project')
             ->brandLogo(SettingsService::get('project_logo') ? asset('storage/' . SettingsService::get('project_logo') ) : null)
@@ -44,7 +49,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue,
                 'gray' => Color::Blue,
-                'background' => Color::hex('#0e4985ff'),
+                // 'background' => Color::hex('#0e4985ff'),
             ])
             // ->spa()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
