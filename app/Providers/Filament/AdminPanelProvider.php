@@ -25,14 +25,10 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-
-        $logo = SettingsService::get('project_logo');
-        $name = SettingsService::get('project_name');
-
         return $panel
             ->default()
-            ->brandName($name ?? 'My Project')
-            ->brandLogo($logo ? asset('storage/' . $logo) : null)
+            ->brandName(SettingsService::get('project_name') ?? 'My Project')
+            ->brandLogo(SettingsService::get('project_logo') ? asset('storage/' . SettingsService::get('project_logo') ) : null)
             ->navigationGroups(Groups::all())
             ->id('admin')
             ->path('admin')
