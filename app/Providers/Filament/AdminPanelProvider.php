@@ -21,19 +21,29 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Filament\Navigation\Groups;
 use App\Services\SettingsService;
 use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Schema;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $brandName = 'My Project';
+        $brandLogo = null;
+
+        if (Schema::hasTable('settings')) {
+            $brandName = SettingsService::get('project_name') ?? $brandName;
+            $brandLogo = SettingsService::get('project_logo')
+                ? asset('storage/' . SettingsService::get('project_logo'))
+                : null;
+        }
         return $panel
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn (): string => '<link rel="stylesheet" href="'.asset('css/custom.css').'">'
             )
             ->default()
-            ->brandName(SettingsService::get('project_name') ?? 'My Project')
-            ->brandLogo(SettingsService::get('project_logo') ? asset('storage/' . SettingsService::get('project_logo') ) : null)
+            ->brandName($brandName)
+            ->brandLogo($brandLogo)
             ->navigationGroups(Groups::all())
             ->id('admin')
             ->path('admin')
