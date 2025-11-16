@@ -10,6 +10,7 @@ class Groups
     {
         return [
             
+            NavigationGroup::make()->label('الاشتراكات')->icon('heroicon-o-globe-alt'), 
             NavigationGroup::make()->label('المستخدمين')->icon('heroicon-o-user-group'), 
             NavigationGroup::make()->label('الادوار والصلاحيات')->icon('heroicon-o-shield-check'),
             NavigationGroup::make()->label('الإعدادات')->icon('heroicon-o-cog'), 
